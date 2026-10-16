@@ -1,0 +1,35 @@
+   Source: NPCI (National Payments Corporation of India), Fraud Awareness
+   URL: https://www.npci.org.in/fraud-awareness
+   Retrieved: 17 October 2026
+
+Fraudsters may use threatening tactics to entice gullible victims into making payments, such as sending SMS or social media chat messages that claim their electric connection will be discontinued due to delayed payment. These messages are designed to create a sense of urgency and panic and may lead users to make hasty payments without verifying the legitimacy of the message or the sender.
+
+To avoid falling for this type of scam, it's important to be cautious when receiving urgent or threatening messages about payment. Always verify the sender and the message before making any payments, and never make payments to unverified or untrusted sources. Check to see if the message is coming from a legitimate business account or phone number and contact the company directly to confirm the authenticity of message before taking any action.
+
+Remember, scammers often use fear and urgency as a tactic to pressurize victims into making hasty decisions, so take your time and verify all messages before making any payments. Protect your personal and financial information at all times and be vigilant in guarding against fraud.
+
+Do's & Don'ts for users
+
+Do's
+
+Updated Mobile number is registered in bank records
+
+UPI pin is to be entered only for payments and not for receipts
+
+Always checks for In-app notifications from UPI Apps while doing a transaction
+
+Find contact details of bank from website only
+
+In case of complaints, user should report it only to bank or police authorities
+
+Don'ts
+
+Never forward any SMS on being asked by an unknown person posing as your bank or government official
+
+Never share debit card credentials & UPI Pin with a third party
+
+Remote access / Screen sharing apps can be used by fraudsters to gain access or view your screen so avoid using such Apps while doing financial transactions
+
+Never post transactional details about your grievances on social media
+
+Avoid carrying out transactions while speaking with a third party on call

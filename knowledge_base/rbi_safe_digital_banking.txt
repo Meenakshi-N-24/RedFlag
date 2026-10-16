@@ -1,0 +1,9 @@
+Source: RBI (Reserve Bank of India), RBI Kehta Hai: Safe Digital Banking (SMS and IVRS messages)
+URL: https://www.rbi.org.in/commonman/English/scripts/smsdigitalbanking.aspx
+Retrieved: 17 October 2026
+
+SMS on Safe Digital Banking
+Online Banking? Only use sites with https; avoid banking on free networks; regularly change and do not share password/PIN. For more, give missed call on 14440.
+
+IVRS on Safe Digital Banking
+Register your mobile number and email with your bank to get instant alerts. If you get an alert about a transaction that you have not initiated or authorised, you can immediately take it up with your bank. You need to take a few more precautions while banking online. For instance, do not store important banking data in your mobile, email or wallet. Use only verified, secure and trusted websites, that is, websites starting with https: for online banking. Avoid banking through public, open or free networks. Change your online banking password and PIN. Block your ATM card, Credit Card, Prepaid Card immediately, if it is lost or stolen.
