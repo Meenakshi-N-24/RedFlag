@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RedFlag: SMS scam checker</title>
+<meta name="description" content="Paste a suspicious SMS and get a scam-likelihood estimate with source-backed safety tips.">
+<style>
+  :root {
+    --bg: #0b1020; --card: #131a2e; --card2: #19213a; --text: #e8ecf8; --muted: #9aa6c4;
+    --border: #25304f; --accent: #6c7bff; --accent2: #38c6ff; --errtext: #ff8a8c; --red: #ff4d4f; --amber: #ffb020; --green: #2ecc71;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #f2f4fb; --card: #ffffff; --card2: #f5f7fd; --text: #151a2c; --muted: #5b6580;
+            --border: #dde3f2; --accent: #4f5df0; --accent2: #1c9fe0; --errtext: #b42318; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: radial-gradient(1200px 600px at 50% -10%, color-mix(in srgb, var(--accent) 22%, transparent), transparent), var(--bg);
+    color: var(--text); min-height: 100vh; padding: 20px 14px 40px; line-height: 1.5;
+  }
+  .phone { max-width: 480px; margin: 0 auto; }
+  header { text-align: center; margin: 8px 0 18px; }
+  .logo { font-size: 28px; font-weight: 800; letter-spacing: .3px; }
+  .logo span { color: var(--red); }
+  .tag { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 16px;
+          box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+  textarea {
+    width: 100%; min-height: 150px; resize: vertical; padding: 14px 16px; font: inherit; font-size: 16px;
+    color: var(--text); background: var(--card2); border: 1px solid var(--border);
+    border-radius: 18px 18px 18px 6px; outline: none;
+  }
+  textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 6px;
+         font-size: 12px; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+  .chip { font: inherit; font-size: 12.5px; color: var(--text); background: var(--card2); border: 1px solid var(--border);
+          border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+  .chip:hover { border-color: var(--accent); }
+  .scan {
+    width: 100%; margin-top: 14px; padding: 14px 18px; font: inherit; font-size: 16px; font-weight: 700; color: #fff;
+    border: 0; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+  }
+  .scan:disabled { opacity: .55; cursor: not-allowed; }
+  .scan:focus-visible, .chip:focus-visible, summary:focus-visible, a:focus-visible {
+    outline: 3px solid var(--accent2); outline-offset: 2px; }
+  .spinner { width: 18px; height: 18px; border: 3px solid rgba(255,255,255,.4); border-top-color: #fff;
+             border-radius: 50%; animation: spin .8s linear infinite; display: none; }
+  .loading .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hint, .error { margin-top: 12px; font-size: 13.5px; border-radius: 12px; padding: 10px 12px; display: none; }
+  .hint { color: var(--muted); background: var(--card2); }
+  .error { color: var(--errtext); background: color-mix(in srgb, var(--red) 12%, transparent); border: 1px solid color-mix(in srgb, var(--red) 40%, transparent); }
+  .show { display: block; }
+
+  #result { display: none; margin-top: 16px; }
+  #result.show { display: block; animation: rise .35s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .scam   { --c: var(--red); }
+  .unsure { --c: var(--amber); }
+  .safe   { --c: var(--green); }
+  .badge { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px;
+           background: color-mix(in srgb, var(--c) 14%, var(--card2)); border: 1px solid var(--c);
+           box-shadow: 0 0 22px color-mix(in srgb, var(--c) 45%, transparent); animation: glow 2.4s ease-in-out infinite; }
+  @keyframes glow { 50% { box-shadow: 0 0 34px color-mix(in srgb, var(--c) 65%, transparent); } }
+  .badge .icon { font-size: 32px; line-height: 1; }
+  .badge .title { font-size: 20px; font-weight: 800; color: var(--c); }
+  .badge .verdict { font-size: 13px; color: var(--muted); }
+  .summary { margin: 14px 2px 4px; font-size: 15.5px; font-weight: 600; }
+  .meter-wrap { margin: 14px 2px 4px; }
+  .meter-top { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
+  .meter { position: relative; height: 10px; border-radius: 999px; background: var(--card2); border: 1px solid var(--border); overflow: hidden; }
+  .fill { height: 100%; width: 0; background: var(--c); border-radius: 999px; transition: width .6s ease; }
+  .tick { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  h2 { font-size: 14px; letter-spacing: .3px; text-transform: uppercase; color: var(--muted); margin: 18px 2px 8px; }
+  ul.tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .tip { background: var(--card2); border: 1px solid var(--border); border-left: 4px solid var(--c); border-radius: 12px; padding: 12px 14px; }
+  .tip p { margin: 0 0 6px; font-size: 15px; }
+  .src { font-size: 12.5px; color: var(--muted); }
+  .src a { color: var(--accent2); }
+  details { margin-top: 6px; font-size: 13px; }
+  summary { cursor: pointer; color: var(--accent2); }
+  blockquote { margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid var(--border); color: var(--muted); font-size: 12.5px; }
+  .disclaimer { margin-top: 16px; font-size: 12px; color: var(--muted); }
+  footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 18px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<main class="phone">
+  <header>
+    <div class="logo">🚩 Red<span>Flag</span></div>
+    <div class="tag">Paste a suspicious SMS. Get a second opinion.</div>
+  </header>
+
+  <section class="card" aria-labelledby="lbl">
+    <label id="lbl" for="msg">Message to check</label>
+    <textarea id="msg" maxlength="1000" placeholder="Paste the SMS text here…" autocomplete="off"></textarea>
+    <div class="row">
+      <span>Press Ctrl + Enter to scan</span>
+      <span><span id="count">0</span> / 1000</span>
+    </div>
+
+    <div class="chips" aria-label="Sample messages">
+      <button class="chip" type="button" data-sample="Dear customer, your KYC verification is pending. Update your details within 24 hours at http://kyc-verify.example to avoid account suspension.">Sample: KYC message</button>
+      <button class="chip" type="button" data-sample="Rs 640 debited from A/c XX2178 on 24-Oct. Bal Rs 7,420. If not you, call your bank.">Sample: bank alert</button>
+      <button class="chip" type="button" data-sample="Your parcel is held at the depot. Pay a Rs 35 redelivery fee at http://parcel-pay.example to receive it today.">Sample: parcel message</button>
+    </div>
+
+    <button id="scanBtn" class="scan" type="button" disabled>
+      <span class="spinner" aria-hidden="true"></span>
+      <span id="btnLabel">Scan Message</span>
+    </button>
+    <div id="hint" class="hint" role="status"></div>
+    <div id="error" class="error" role="alert"></div>
+  </section>
+
+  <section id="result" class="card" aria-live="polite" aria-label="Scan result">
+    <div id="badge" class="badge">
+      <div id="icon" class="icon"></div>
+      <div><div id="title" class="title"></div><div id="verdict" class="verdict"></div></div>
+    </div>
+    <p id="summary" class="summary"></p>
+    <div class="meter-wrap">
+      <div class="meter-top"><span>Estimated scam probability</span><strong id="pct"></strong></div>
+      <div class="meter"><div id="fill" class="fill"></div><div class="tick" style="left:35%"></div><div class="tick" style="left:65%"></div></div>
+      <div class="scale"><span>0%</span><span>35%</span><span>65%</span><span>100%</span></div>
+    </div>
+    <h2>What you can do</h2>
+    <ul id="tips" class="tips"></ul>
+    <p id="disclaimer" class="disclaimer"></p>
+  </section>
+
+  <footer>
+    Student project · Tips come from NPCI, RBI, Sanchar Saathi and Kerala Police pages · Your message is sent to the RedFlag server to be scanned, and is not saved.
+  </footer>
+</main>
+<noscript><p style="text-align:center">RedFlag needs JavaScript to run.</p></noscript>
+
+<script>
+  // Change this to your deployed backend URL when you publish the site, e.g. "https://your-space.hf.space"
+  const API_BASE = "https://redflag-api-iisy.onrender.com";
+
+  const $ = (id) => document.getElementById(id);
+  const msg = $("msg"), btn = $("scanBtn"), label = $("btnLabel"), hint = $("hint"), err = $("error"), result = $("result");
+
+  // "Likely safe" on purpose: the model gives probabilities, so we never claim a message is certainly safe.
+  const VERDICTS = {
+    "likely scam":       { cls: "scam",   icon: "🚨", title: "Red Flag" },
+    "unsure":            { cls: "unsure", icon: "⚠️", title: "Warning" },
+    "likely legitimate": { cls: "safe",   icon: "✅", title: "Likely safe" },
+  };
+
+  function updateButton() {
+    $("count").textContent = msg.value.length;
+    btn.disabled = msg.value.trim().length === 0 || btn.classList.contains("loading");
+  }
+  msg.addEventListener("input", updateButton);
+  msg.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && !btn.disabled) scan(); });
+  document.querySelectorAll(".chip").forEach((c) =>
+    c.addEventListener("click", () => { msg.value = c.dataset.sample; updateButton(); msg.focus(); }));
+  btn.addEventListener("click", scan);
+
+  function showError(text) { err.textContent = text; err.classList.add("show"); }
+  function setLoading(on) {
+    btn.classList.toggle("loading", on);
+    label.textContent = on ? "Scanning…" : "Scan Message";
+    btn.disabled = on || msg.value.trim().length === 0;
+  }
+
+  async function scan() {
+    const text = msg.value.trim();
+    if (!text) return;
+    err.classList.remove("show"); hint.classList.remove("show"); result.classList.remove("show");
+    setLoading(true);
+    // Free servers sleep when idle, so the first request can take a while.
+    const slow = setTimeout(() => { hint.textContent = "The free server may be waking up. This can take up to a minute…"; hint.classList.add("show"); }, 6000);
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 75000);
+    try {
+      const res = await fetch(API_BASE + "/api/scan", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }), signal: ctrl.signal,
+      });
+      if (res.status === 422) throw new Error("That message could not be scanned. Check that it is not empty or too long.");
+      if (!res.ok) throw new Error("The server had a problem (" + res.status + "). Please try again in a moment.");
+      render(await res.json());
+    } catch (e) {
+      showError(e.name === "AbortError" ? "The server took too long to answer. Please try again."
+        : e instanceof TypeError
+          ? "Could not reach the RedFlag server. If it is a free host, it may be asleep. Try again in a minute."
+          : e.message);
+    } finally {
+      clearTimeout(slow); clearTimeout(timeout); hint.classList.remove("show"); setLoading(false);
+    }
+  }
+
+  function render(d) {
+    const v = VERDICTS[d.verdict] || VERDICTS["unsure"];
+    $("badge").className = "badge";
+    result.className = "card " + v.cls;
+    $("icon").textContent = v.icon;
+    $("title").textContent = v.title;
+    $("verdict").textContent = d.verdict;
+    $("summary").textContent = d.summary;
+    const pct = Math.round(d.confidence_score * 100);
+    $("pct").textContent = pct + "%";
+    $("fill").style.width = "0";
+    requestAnimationFrame(() => { $("fill").style.width = pct + "%"; });
+
+    const list = $("tips"); list.replaceChildren();
+    for (const item of d.advice_items) {
+      const li = document.createElement("li"); li.className = "tip";
+      const p = document.createElement("p"); p.textContent = item.tip; li.appendChild(p);
+      const src = document.createElement("div"); src.className = "src";
+      src.append("Source: ");
+      const a = document.createElement("a");
+      a.href = item.url; a.textContent = item.source_short; a.target = "_blank"; a.rel = "noopener noreferrer";
+      src.append(a, " · retrieved " + item.retrieved);
+      li.appendChild(src);
+      if (item.quotes && item.quotes.length) {
+        const det = document.createElement("details");
+        const sum = document.createElement("summary"); sum.textContent = "What the source says";
+        det.appendChild(sum);
+        for (const q of item.quotes) {
+          const bq = document.createElement("blockquote"); bq.textContent = "“" + q + "”"; det.appendChild(bq);
+        }
+        li.appendChild(det);
+      }
+      list.appendChild(li);
+    }
+    $("disclaimer").textContent = d.disclaimer;
+    result.classList.add("show");
+    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  updateButton();
+</script>
+</body>
+</html>
