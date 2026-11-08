@@ -46,7 +46,7 @@ Full details are in the project report.
 - The Indian-style set has only 100 hand-written messages, so results on it are rough.
 - The deployed model was trained on all 100 of them, so it has no clean held-out Indian-style score.
 - The training data is an older, mostly UK-style SMS corpus whose "spam" label is broader than "scam".
-- Hinglish and short messages are handled poorly. Ordinary bank alerts can land near the boundary.
+- Models trained only on the SMS data handled Hinglish and short messages poorly. The deployed model was trained with some Hinglish examples, but its Hinglish performance has not been tested separately. Ordinary bank alerts can land near the verdict boundary..
 - Tips are generic by verdict band, not tailored to each message.
 - The knowledge base is a snapshot of four pages, one of them a state-police notice from August 2023. Helplines and portals can change, so confirm contact details on the official sites.
 
