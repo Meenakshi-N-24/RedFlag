@@ -1,6 +1,6 @@
-   Source: NPCI (National Payments Corporation of India), Fraud Awareness
-   URL: https://www.npci.org.in/fraud-awareness
-   Retrieved: 17 October 2026
+Source: NPCI (National Payments Corporation of India), Fraud Awareness
+URL: https://www.npci.org.in/fraud-awareness
+Retrieved: 17 October 2026
 
 Fraudsters may use threatening tactics to entice gullible victims into making payments, such as sending SMS or social media chat messages that claim their electric connection will be discontinued due to delayed payment. These messages are designed to create a sense of urgency and panic and may lead users to make hasty payments without verifying the legitimacy of the message or the sender.
 
